@@ -1,13 +1,17 @@
 // ==UserScript==
 // @name        Steam Card Exchange Watchlist Synchronizer
-// @namespace   DB
-// @version     0.1
+// @namespace   Steam Card Exchange Watchlist Synchronizer
+// @author	DB
 // @description Synchs with actual Steam Inventory
+// @version     0.2
 // @icon        http://i.imgur.com/XYzKXzK.png
+// @downloadURL https://github.com/Laurvin/Steam-Card-Exchange-Watchlist-Synchronizer/raw/master/Steam_Card_Exchange_Watchlist_Synchronizer.user.js
+// @updateURL	https://github.com/Laurvin/Steam-Card-Exchange-Watchlist-Synchronizer/raw/master/Steam_Card_Exchange_Watchlist_Synchronizer.user.js
 // @include     http://www.steamcardexchange.net/index.php?userlist
 // @grant       GM_xmlhttpRequest
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
 // @require     https://raw.githubusercontent.com/Sighery/SRQ/master/SerialRequestsQueue.js
+// @run-at document-idle
 // ==/UserScript==
 
 var queue = new SRQ();
@@ -38,7 +42,7 @@ function SynchLists()
 		{
 			"link": "http://steamcommunity.com/my/inventory/json/753/6",
 			"method": "GET",
-			"timeout": 5000
+			"timeout": 6000
 		});
 
 	if (queue.is_busy() === false)
@@ -76,7 +80,7 @@ function inv_request_callback(requested_obj) {
 				{
 					"link": "http://steamcommunity.com/my/inventory/json/753/6?start=" + InvJSON.more_start,
 					"method": "GET",
-					"timeout": 5000
+					"timeout": 6000
 				});
 
 			queue.start(inv_request_callback);
@@ -180,7 +184,7 @@ function AddRemoveFromSCEWatchlist(add_or_remove, appIDs)
 			{
 				console.log(add_or_remove, current_id);
 				$("#id" + current_id).css("color", IDcolor);
-				myVar = setTimeout(AddRemoveFromSCEWatchlist, 2000, add_or_remove, appIDs);
+				myVar = setTimeout(AddRemoveFromSCEWatchlist, 1500, add_or_remove, appIDs);
 			},
 			error : function(xhr, status, errorThrown)
 			{
