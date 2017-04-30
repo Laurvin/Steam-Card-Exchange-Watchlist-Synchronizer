@@ -3,13 +3,14 @@
 // @namespace   Steam Card Exchange Watchlist Synchronizer
 // @author	DB
 // @description Synchs with actual Steam Inventory
-// @version     0.2
+// @version     0.3
 // @icon        http://i.imgur.com/XYzKXzK.png
 // @downloadURL https://github.com/Laurvin/Steam-Card-Exchange-Watchlist-Synchronizer/raw/master/Steam_Card_Exchange_Watchlist_Synchronizer.user.js
 // @updateURL	https://github.com/Laurvin/Steam-Card-Exchange-Watchlist-Synchronizer/raw/master/Steam_Card_Exchange_Watchlist_Synchronizer.user.js
 // @include     http://www.steamcardexchange.net/index.php?userlist
+// @include     https://www.steamcardexchange.net/index.php?userlist
 // @grant       GM_xmlhttpRequest
-// @require     http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
+// @require     http://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js
 // @require     https://raw.githubusercontent.com/Sighery/SRQ/master/SerialRequestsQueue.js
 // @run-at document-idle
 // ==/UserScript==
@@ -77,17 +78,18 @@ function inv_request_callback(requested_obj) {
 		if (InvJSON.more === true)
 		{
 			queue.add_to_queue(
-				{
-					"link": "http://steamcommunity.com/my/inventory/json/753/6?start=" + InvJSON.more_start,
-					"method": "GET",
-					"timeout": 6000
-				});
+			{
+				"link": "http://steamcommunity.com/my/inventory/json/753/6?start=" + InvJSON.more_start,
+				"method": "GET",
+				"timeout": 6000
+			});
 
+			InvJSON = null;
 			queue.start(inv_request_callback);
 		}
 		else
 		{
-			console.log("All loaded!");
+			InvJSON = null;
 			$('#SteamInvLoading').text('All loaded!');
 
 			var SCEids = $('.even, .odd').map(function() // Filling array with all games in SCE Watchlist.
@@ -95,13 +97,11 @@ function inv_request_callback(requested_obj) {
 				return this.id.substring(6);
 			}).get();
 
-			console.log("Number of games in SCE Watchlist", SCEids.length);
 			$('#SynchDiv').append('<p>Number of games in SCE Watchlist: ' + SCEids.length + '</p>');
 
 			var SCEids2 = new Set(SCEids);
 			var InSteamInvNotInSCE = [...new Set([...Steamids].filter(x => !SCEids2.has(x)))];
 
-			console.log("Games in Steam Inventory but not in Watchlist", InSteamInvNotInSCE.length);
 			$('#SynchDiv').append('<p><br />Games in Steam Inventory but not in Watchlist: ' + InSteamInvNotInSCE.length + '<br /</p>');
 
 			if (InSteamInvNotInSCE.length > 0)
@@ -116,7 +116,6 @@ function inv_request_callback(requested_obj) {
 			var Steamids2 = new Set(Steamids);
 			var InSCENotInSteamInv = [...new Set([...SCEids].filter(x => !Steamids2.has(x)))];
 
-			console.log("Games in Watchlist but not in Steam Inventory", InSCENotInSteamInv.length);
 			$('#SynchDiv').append('<p><br />Games in Watchlist but not in Steam Inventory: ' + InSCENotInSteamInv.length + '<br /></p>');
 
 			if (InSCENotInSteamInv.length > 0)
@@ -128,14 +127,13 @@ function inv_request_callback(requested_obj) {
 				AddRemoveFromSCEWatchlist("remove", InSCENotInSteamInv);
 			}
 
-			$('#SynchDiv').append('<p><br />Working... AppIDs in green and/or red above should have changed but rate limiting might have borked some so it pays to check. SYNCH button removed till page reload.</p>');
+			$('#SynchDiv').append('<p><br />Working... AppIDs should all turn green (when adding) or red (when deleting), if not, rate limiting might have borked some. It pays to check the result either way; there could always be weird bugs. SYNCH button removed till page reload.</p>');
 			$('#SynchIt').remove();
 		}
 
 	}
 	else
 	{
-		console.log("Fail");
 		$('#SynchDiv').append('<p>FAILED to load (part of) Steam Inventory! See if this link works: <a href="http://steamcommunity.com/my/inventory/json/753/6">http://steamcommunity.com/my/inventory/json/753/6</a>, if not then Steam is down or things have changed. Reload this page to try again.</p>');
 	}
 
@@ -171,11 +169,12 @@ function AddRemoveFromSCEWatchlist(add_or_remove, appIDs)
 			url: 'http://www.steamcardexchange.net/index.php?inventorygame-appid-' + current_id,
 			headers: { "Content-type" : "application/x-www-form-urlencoded" },
 			data: encodeURI(add_or_remove+"=true"),
-			timeout: 5000,
+			timeout: 6000,
 			statusCode:
 			{
 				503: function (response)
 				{
+					console.log("503'ed!");
 					$('#SynchDiv').append('<p>Ran into a 503 error! Rate limiting stops us from processing more for now.</p>');
 					return;
 				}
@@ -188,6 +187,7 @@ function AddRemoveFromSCEWatchlist(add_or_remove, appIDs)
 			},
 			error : function(xhr, status, errorThrown)
 			{
+				console.log("Error! " + status + errorThrown);
 				alert("Error! " + status + errorThrown);
 			}
 		});
