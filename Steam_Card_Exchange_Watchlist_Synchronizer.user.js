@@ -1,16 +1,15 @@
 // ==UserScript==
-// @name        Steam Card Exchange Watchlist Synchronizer
-// @namespace   Steam Card Exchange Watchlist Synchronizer
-// @author      Laurvin
+// @name Steam Card Exchange Watchlist Synchronizer
+// @namespace Steam Card Exchange Watchlist Synchronizer
+// @author Laurvin
 // @description Synchs with actual Steam Inventory
-// @version     0.5
-// @icon        http://i.imgur.com/XYzKXzK.png
+// @version 0.6
+// @icon http://i.imgur.com/XYzKXzK.png
 // @downloadURL https://github.com/Laurvin/Steam-Card-Exchange-Watchlist-Synchronizer/raw/master/Steam_Card_Exchange_Watchlist_Synchronizer.user.js
-// @updateURL   https://github.com/Laurvin/Steam-Card-Exchange-Watchlist-Synchronizer/raw/master/Steam_Card_Exchange_Watchlist_Synchronizer.user.js
-// @include     http://www.steamcardexchange.net/index.php?userlist
-// @include     https://www.steamcardexchange.net/index.php?userlist
-// @grant       GM_xmlhttpRequest
-// @require     https://github.com/Sighery/SRQ/releases/download/v0.1.0/SerialRequestsQueue-0.1.0.js
+// @include http://www.steamcardexchange.net/index.php?userlist
+// @include https://www.steamcardexchange.net/index.php?userlist
+// @grant GM_xmlhttpRequest
+// @require https://github.com/Sighery/SRQ/releases/download/v0.1.0/SerialRequestsQueue-0.1.0.js
 // @run-at document-idle
 // ==/UserScript==
 
@@ -43,11 +42,11 @@ function SynchLists()
 	$('#SynchDiv').append('<p>Loading Steam Inventory in 2,000 item chunks. <span id="SteamInvLoading">Loading from 0 onwards.</span> There will be a few seconds pause at the end.');
 	$('#SynchDiv').append('<p>Number of games with cards in Steam Inventory: <strong><span id="SteamInvTotals">0</span></strong></p>');
 	queue.add_to_queue(
-		{
-			"link": "http://steamcommunity.com/my/inventory/json/753/6",
-			"method": "GET",
-			"timeout": 6000
-		});
+	{
+		"link": "http://steamcommunity.com/my/inventory/json/753/6",
+		"method": "GET",
+		"timeout": 6000
+	});
 
 	if (queue.is_busy() === false)
 	{
@@ -110,36 +109,6 @@ function inv_request_callback(requested_obj) {
 			InvJSON = null;
 			$('#SteamInvLoading').text('All loaded!');
 
-			console.log("Starting Table Additions!");
-			$("#inventorylist tr:first").append('<th title="Owned Cards">O C</th>');
-			$("#inventorylist tr:first").append('<th title="Possible Badges to be created">P B</th>');
-			$("#inventorylist tr:first").append('<th title="Cards remaining after crafting badges">C R</th>');
-
-			var MyRows = $('#inventorylist').find('tbody').find('tr');
-
-			for (var i = 0; i < MyRows.length; i++)
-			{
-				var appID = $(MyRows[i]).find('td:eq(1)').attr('id');
-				appID = appID.substring(6);
-				var SetSize = $(MyRows[i]).find('td:eq(3)').text();
-				SetSize = SetSize.substring(SetSize.length - 9, SetSize.length - 7);
-				if (CardAmounts[appID] === undefined) CardAmounts[appID] = 0; // If no cards in Inventory this throws up a problem.
-				var BadgesAbleToCreate = Math.floor(CardAmounts[appID]/SetSize);
-				var RemainingCards = CardAmounts[appID] - (BadgesAbleToCreate * SetSize);
-				$(MyRows[i]).append('<td>'+CardAmounts[appID]+'</td>');
-				$(MyRows[i]).append('<td>'+BadgesAbleToCreate+'</td>');
-				$(MyRows[i]).append('<td>'+RemainingCards+'</td>');
-			}
-
-			$("#inventorylist").trigger("destroy");
-			$("#inventorylist").tablesorter(
-				{
-					sortList: [[4,1]],
-					widgets: ["zebra"]
-				});
-
-			console.log("Finished Table Additions!");
-
 			var SCEids = $('.even, .odd').map(function() // Filling array with all games in SCE Watchlist.
 			{
 				return this.id.substring(6);
@@ -177,6 +146,38 @@ function inv_request_callback(requested_obj) {
 
 			$('#SynchDiv').append('<p><br />Working... AppIDs should all turn green (when adding) or red (when deleting), if not, rate limiting might have borked some. It pays to check the result either way; there could always be weird bugs. SYNCH button removed till page reload.</p>');
 			$('#SynchIt').remove();
+
+			console.log("Starting Table Additions!");
+			$("#inventorylist tr:first").append('<th title="Owned Cards">O C</th>');
+			$("#inventorylist tr:first").append('<th title="Possible Badges to be created">P B</th>');
+			$("#inventorylist tr:first").append('<th title="Cards remaining after crafting badges">C R</th>');
+
+			var MyRows = $('#inventorylist').find('tbody').find('tr');
+
+			for (var i = 0; i < MyRows.length; i++)
+			{
+				var appID = $(MyRows[i]).find('td:eq(1)').attr('id');
+				appID = appID.substring(6);
+				var SetSize = $(MyRows[i]).find('td:eq(3)').text();
+				SetSize = SetSize.substring(SetSize.length - 9, SetSize.length - 7);
+				if (CardAmounts[appID] === undefined) CardAmounts[appID] = 0; // If no cards in Inventory this throws up a problem.
+				var BadgesAbleToCreate = Math.floor(CardAmounts[appID]/SetSize);
+				var RemainingCards = CardAmounts[appID] - (BadgesAbleToCreate * SetSize);
+				$(MyRows[i]).append('<td>'+CardAmounts[appID]+'</td>');
+				$(MyRows[i]).append('<td>'+BadgesAbleToCreate+'</td>');
+				$(MyRows[i]).append('<td>'+RemainingCards+'</td>');
+			}
+
+			$("#inventorylist").trigger("destroy");
+			$("#inventorylist").tablesorter(
+			{
+				sortList: [[4,1]],
+				widgets: ["zebra"]
+			});
+
+			console.log("Finished Table Additions!");
+			
+			CardAmounts = null;
 		}
 
 	}
@@ -227,7 +228,7 @@ function AddRemoveFromSCEWatchlist(add_or_remove, appIDs)
 					return;
 				}
 			},
-				success: function(html, textStatus)
+			success: function(html, textStatus)
 			{
 				console.log(add_or_remove, current_id);
 				$("#id" + current_id).css("color", IDcolor);
@@ -249,7 +250,7 @@ function AddRemoveFromSCEWatchlist(add_or_remove, appIDs)
 
 function hasOwnProperty(obj, prop)
 {
-    var proto = obj.__proto__ || obj.constructor.prototype;
-    return (prop in obj) &&
-        (!(prop in proto) || proto[prop] !== obj[prop]);
+	var proto = obj.__proto__ || obj.constructor.prototype;
+	return (prop in obj) &&
+		(!(prop in proto) || proto[prop] !== obj[prop]);
 }
