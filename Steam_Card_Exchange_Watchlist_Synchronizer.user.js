@@ -3,7 +3,7 @@
 // @namespace Steam Card Exchange Watchlist Synchronizer
 // @author Laurvin
 // @description Synchs with actual Steam Inventory
-// @version 0.6
+// @version 0.7
 // @icon http://i.imgur.com/XYzKXzK.png
 // @downloadURL https://github.com/Laurvin/Steam-Card-Exchange-Watchlist-Synchronizer/raw/master/Steam_Card_Exchange_Watchlist_Synchronizer.user.js
 // @include http://www.steamcardexchange.net/index.php?userlist
@@ -21,7 +21,6 @@ var InventoryAmounts = {};
 
 var CardAmounts = {};
 
-this.$ = this.jQuery = jQuery.noConflict(true);
 $(document).ready(function ()
 {
 	init();
