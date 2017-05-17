@@ -3,7 +3,7 @@
 // @namespace Steam Card Exchange Watchlist Synchronizer
 // @author Laurvin
 // @description Synchs with actual Steam Inventory
-// @version 0.7
+// @version 0.8
 // @icon http://i.imgur.com/XYzKXzK.png
 // @downloadURL https://github.com/Laurvin/Steam-Card-Exchange-Watchlist-Synchronizer/raw/master/Steam_Card_Exchange_Watchlist_Synchronizer.user.js
 // @include http://www.steamcardexchange.net/index.php?userlist
@@ -124,7 +124,7 @@ function inv_request_callback(requested_obj) {
 			{
 				$.each(InSteamInvNotInSCE, function (index, item)
 				{
-					$('#SynchDiv').append('<a id="id' + item + '" href="http://www.steamcardexchange.net/index.php?inventorygame-appid-' + item + '" style="display:inline-block;min-width:50px;margin: 4px 3px 4px 0;">' + item + '</a>');
+					$('#SynchDiv').append('<a id="id' + item + '" href="http://www.steamcardexchange.net/index.php?inventorygame-appid-' + item + '" style="display:inline-block;min-width:50px;margin: 4px 3px 4px 0;" target="_blank">' + item + '</a>');
 				});
 				AddRemoveFromSCEWatchlist("add", InSteamInvNotInSCE);
 			}
@@ -138,7 +138,7 @@ function inv_request_callback(requested_obj) {
 			{
 				$.each(InSCENotInSteamInv, function (index, item)
 				{
-					$('#SynchDiv').append('<a id="id' + item + '" href="http://www.steamcardexchange.net/index.php?inventorygame-appid-' + item + '" style="display:inline-block;min-width:50px;margin: 4px 3px 4px 0;">' + item + '</a>');
+					$('#SynchDiv').append('<a id="id' + item + '" href="http://www.steamcardexchange.net/index.php?inventorygame-appid-' + item + '" style="display:inline-block;min-width:50px;margin: 4px 3px 4px 0;" target="_blank">' + item + '</a>');
 				});
 				AddRemoveFromSCEWatchlist("remove", InSCENotInSteamInv);
 			}
@@ -147,8 +147,10 @@ function inv_request_callback(requested_obj) {
 			$('#SynchIt').remove();
 
 			console.log("Starting Table Additions!");
+			$("#inventorylist thead tr:first th:eq(2)").text('Stock');
 			$("#inventorylist tr:first").append('<th title="Owned Cards">O C</th>');
 			$("#inventorylist tr:first").append('<th title="Possible Badges to be created">P B</th>');
+			$("#inventorylist tr:first").append('<th title="Cards needed for another badge">C N</th>');
 			$("#inventorylist tr:first").append('<th title="Cards remaining after crafting badges">C R</th>');
 
 			var MyRows = $('#inventorylist').find('tbody').find('tr');
@@ -162,8 +164,10 @@ function inv_request_callback(requested_obj) {
 				if (CardAmounts[appID] === undefined) CardAmounts[appID] = 0; // If no cards in Inventory this throws up a problem.
 				var BadgesAbleToCreate = Math.floor(CardAmounts[appID]/SetSize);
 				var RemainingCards = CardAmounts[appID] - (BadgesAbleToCreate * SetSize);
+				var CardsNeeded = SetSize - RemainingCards;
 				$(MyRows[i]).append('<td>'+CardAmounts[appID]+'</td>');
 				$(MyRows[i]).append('<td>'+BadgesAbleToCreate+'</td>');
+				$(MyRows[i]).append('<td>'+CardsNeeded+'</td>');
 				$(MyRows[i]).append('<td>'+RemainingCards+'</td>');
 			}
 
