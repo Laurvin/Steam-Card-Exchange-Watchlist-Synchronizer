@@ -3,7 +3,7 @@
 // @namespace Steam Card Exchange Watchlist Synchronizer
 // @author Laurvin
 // @description Synchs with actual Steam Inventory
-// @version 0.8
+// @version 2.0
 // @icon http://i.imgur.com/XYzKXzK.png
 // @downloadURL https://github.com/Laurvin/Steam-Card-Exchange-Watchlist-Synchronizer/raw/master/Steam_Card_Exchange_Watchlist_Synchronizer.user.js
 // @include http://www.steamcardexchange.net/index.php?userlist
@@ -108,9 +108,11 @@ function inv_request_callback(requested_obj) {
 			InvJSON = null;
 			$('#SteamInvLoading').text('All loaded!');
 
-			var SCEids = $('.even, .odd').map(function() // Filling array with all games in SCE Watchlist.
+			var SCEids = $('table.dataTable a').map(function() // Filling array with all games in SCE Watchlist.
 			{
-				return this.id.substring(6);
+				var SteamID = $(this).attr('href');
+				SteamID = SteamID.substring(SteamID.lastIndexOf('-')+1);
+				return SteamID;
 			}).get();
 
 			$('#SynchDiv').append('<p>Number of games in SCE Watchlist: <strong>' + SCEids.length + '</strong></p>');
@@ -147,18 +149,17 @@ function inv_request_callback(requested_obj) {
 			$('#SynchIt').remove();
 
 			console.log("Starting Table Additions!");
-			$("#inventorylist thead tr:first th:eq(2)").text('Stock');
-			$("#inventorylist tr:first").append('<th title="Owned Cards">O C</th>');
-			$("#inventorylist tr:first").append('<th title="Possible Badges to be created">P B</th>');
-			$("#inventorylist tr:first").append('<th title="Cards needed for another badge">C N</th>');
-			$("#inventorylist tr:first").append('<th title="Cards remaining after crafting badges">C R</th>');
+			$("#private_watchlist tr:first").append('<th title="Owned Cards">O C</th>');
+			$("#private_watchlist tr:first").append('<th title="Possible Badges to be created">P B</th>');
+			$("#private_watchlist tr:first").append('<th title="Cards needed for another badge">C N</th>');
+			$("#private_watchlist tr:first").append('<th title="Cards remaining after crafting badges">C R</th>');
 
-			var MyRows = $('#inventorylist').find('tbody').find('tr');
+			var MyRows = $('#private_watchlist').find('tbody').find('tr');
 
 			for (var i = 0; i < MyRows.length; i++)
 			{
-				var appID = $(MyRows[i]).find('td:eq(1)').attr('id');
-				appID = appID.substring(6);
+				var appID = $(MyRows[i]).find('a').attr('href');
+				appID = appID.substring(appID.lastIndexOf('-')+1);
 				var SetSize = $(MyRows[i]).find('td:eq(3)').text();
 				SetSize = SetSize.substring(SetSize.length - 9, SetSize.length - 7);
 				if (CardAmounts[appID] === undefined) CardAmounts[appID] = 0; // If no cards in Inventory this throws up a problem.
@@ -171,12 +172,14 @@ function inv_request_callback(requested_obj) {
 				$(MyRows[i]).append('<td>'+RemainingCards+'</td>');
 			}
 
-			$("#inventorylist").trigger("destroy");
-			$("#inventorylist").tablesorter(
-			{
-				sortList: [[4,1]],
-				widgets: ["zebra"]
-			});
+			$('#private_watchlist').dataTable( {
+				"searching": false,
+				"destroy": true,
+				pageLength: -1,
+				autoWidth: false,
+				stateSave: true,
+				"order": [[ 4, 'desc' ], [ 0, 'asc' ]]
+			} );
 
 			console.log("Finished Table Additions!");
 			
