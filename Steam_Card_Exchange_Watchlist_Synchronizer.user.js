@@ -3,7 +3,7 @@
 // @namespace Steam Card Exchange Watchlist Synchronizer
 // @author Laurvin
 // @description Synchs with actual Steam Inventory
-// @version 2.0
+// @version 2.1
 // @icon http://i.imgur.com/XYzKXzK.png
 // @downloadURL https://github.com/Laurvin/Steam-Card-Exchange-Watchlist-Synchronizer/raw/master/Steam_Card_Exchange_Watchlist_Synchronizer.user.js
 // @include http://www.steamcardexchange.net/index.php?userlist
@@ -161,7 +161,10 @@ function inv_request_callback(requested_obj) {
 				var appID = $(MyRows[i]).find('a').attr('href');
 				appID = appID.substring(appID.lastIndexOf('-')+1);
 				var SetSize = $(MyRows[i]).find('td:eq(3)').text();
-				SetSize = SetSize.substring(SetSize.length - 9, SetSize.length - 7);
+				var SetSizeStart = SetSize.indexOf('of');
+				var SetSizeEnd = SetSize.indexOf(')');
+				var CardsIncluded = (SetSize.indexOf('Cards') == -1) ? 0 : -5; // Need to subtract more if the word Cards is still there.
+				SetSize = SetSize.substring(SetSizeStart + 3 , SetSizeEnd + CardsIncluded);
 				if (CardAmounts[appID] === undefined) CardAmounts[appID] = 0; // If no cards in Inventory this throws up a problem.
 				var BadgesAbleToCreate = Math.floor(CardAmounts[appID]/SetSize);
 				var RemainingCards = CardAmounts[appID] - (BadgesAbleToCreate * SetSize);
@@ -173,6 +176,7 @@ function inv_request_callback(requested_obj) {
 			}
 
 			$('#private_watchlist').dataTable( {
+				dom: 'rt<"dataTables_footer"ip>',
 				"searching": false,
 				"destroy": true,
 				pageLength: -1,
