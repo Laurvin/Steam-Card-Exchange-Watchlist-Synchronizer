@@ -3,7 +3,7 @@
 // @namespace Steam Card Exchange Watchlist Synchronizer
 // @author Laurvin
 // @description Synchs with actual Steam Inventory
-// @version 2.1
+// @version 2.2
 // @icon http://i.imgur.com/XYzKXzK.png
 // @downloadURL https://github.com/Laurvin/Steam-Card-Exchange-Watchlist-Synchronizer/raw/master/Steam_Card_Exchange_Watchlist_Synchronizer.user.js
 // @include http://www.steamcardexchange.net/index.php?userlist
@@ -14,11 +14,8 @@
 // ==/UserScript==
 
 var queue = new SRQ();
-
 var Steamids = [];
-
 var InventoryAmounts = {};
-
 var CardAmounts = {};
 
 $(document).ready(function ()
@@ -27,12 +24,11 @@ $(document).ready(function ()
 });
 function init()
 {
-
 	addHTMLElements();
 }
 function addHTMLElements()
 {
-	$('.content-box-topbar-large').append('<button class="button-blue" id="SynchIt" style="margin-top: 25px; margin-right: 200px;">SYNCH</button>');
+	$('h1.empty').append('<button class="button-blue" id="SynchIt" style="margin-top: 25px;">SYNCH</button>');
 	$('#SynchIt').click(SynchLists);
 }
 function SynchLists()
@@ -83,7 +79,6 @@ function inv_request_callback(requested_obj) {
 				{
 					Steamids.push(item.market_fee_app);
 					CardAmounts[item.market_fee_app] = InventoryAmounts[item.classid+"_"+item.instanceid];
-					// CardAmounts[item.market_fee_app] = 1;
 				}
 			}
 		});
@@ -120,13 +115,13 @@ function inv_request_callback(requested_obj) {
 			var SCEids2 = new Set(SCEids);
 			var InSteamInvNotInSCE = [...new Set([...Steamids].filter(x => !SCEids2.has(x)))];
 
-			$('#SynchDiv').append('<p><br />Games in Steam Inventory but not in Watchlist: <strong>' + InSteamInvNotInSCE.length + '</strong><br /</p>');
+			$('#SynchDiv').append('<p><br />Games in Steam Inventory but not in Watchlist: <strong>' + InSteamInvNotInSCE.length + '</strong></p>');
 
 			if (InSteamInvNotInSCE.length > 0)
 			{
 				$.each(InSteamInvNotInSCE, function (index, item)
 				{
-					$('#SynchDiv').append('<a id="id' + item + '" href="http://www.steamcardexchange.net/index.php?inventorygame-appid-' + item + '" style="display:inline-block;min-width:50px;margin: 4px 3px 4px 0;" target="_blank">' + item + '</a>');
+					$('#SynchDiv').append('<a id="id' + item + '" href="https://www.steamcardexchange.net/index.php?inventorygame-appid-' + item + '" style="display:inline-block;min-width:50px;margin: 4px 3px 4px 0;" target="_blank">' + item + '</a>');
 				});
 				AddRemoveFromSCEWatchlist("add", InSteamInvNotInSCE);
 			}
@@ -140,16 +135,16 @@ function inv_request_callback(requested_obj) {
 			{
 				$.each(InSCENotInSteamInv, function (index, item)
 				{
-					$('#SynchDiv').append('<a id="id' + item + '" href="http://www.steamcardexchange.net/index.php?inventorygame-appid-' + item + '" style="display:inline-block;min-width:50px;margin: 4px 3px 4px 0;" target="_blank">' + item + '</a>');
+					$('#SynchDiv').append('<a id="id' + item + '" href="https://www.steamcardexchange.net/index.php?inventorygame-appid-' + item + '" style="display:inline-block;min-width:50px;margin: 4px 3px 4px 0;" target="_blank">' + item + '</a>');
 				});
 				AddRemoveFromSCEWatchlist("remove", InSCENotInSteamInv);
 			}
 
-			$('#SynchDiv').append('<p><br />Working... AppIDs should all turn green (when adding) or red (when deleting), if not, rate limiting might have borked some. It pays to check the result either way; there could always be weird bugs. SYNCH button removed till page reload.</p>');
+			$('#SynchDiv').append('<p><br />Working... AppIDs should turn green or red one by one, if not, rate limiting might have borked it. It pays to check the result; bugs are always possible. SYNCH button removed till page reload.</p>');
 			$('#SynchIt').remove();
 
 			console.log("Starting Table Additions!");
-			$("#private_watchlist tr:first").append('<th title="Owned Cards">O C</th>');
+			$("#private_watchlist tr:first").append('<th title="Cards Owned">C O</th>');
 			$("#private_watchlist tr:first").append('<th title="Possible Badges to be created">P B</th>');
 			$("#private_watchlist tr:first").append('<th title="Cards needed for another badge">C N</th>');
 			$("#private_watchlist tr:first").append('<th title="Cards remaining after crafting badges">C R</th>');
@@ -225,7 +220,7 @@ function AddRemoveFromSCEWatchlist(add_or_remove, appIDs)
 		$.ajax(
 		{
 			method: 'POST',
-			url: 'http://www.steamcardexchange.net/index.php?inventorygame-appid-' + current_id,
+			url: 'https://www.steamcardexchange.net/index.php?inventorygame-appid-' + current_id,
 			headers: { "Content-type" : "application/x-www-form-urlencoded" },
 			data: encodeURI(add_or_remove+"=true"),
 			timeout: 6000,
