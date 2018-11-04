@@ -49,10 +49,11 @@ function monkeyRequest(url) {
                 resolve(InvJSON);
             },
             onerror: function(response) {
-                reject(response.statusText);
+				console.log(response.statusText);
+				reject(response.statusText);
             },
             ontimeout: function(response) {
-                reject("Timed out!");
+				reject("Timed out!");
             }
         });
     });
@@ -94,8 +95,8 @@ function parseInvJSON(InvJSON) {
         $('#SteamInvLoading').text('Loading from ' + InvJSON.more_start + ' onwards.');
         loadInventory('http://steamcommunity.com/my/inventory/json/753/6?start=' + InvJSON.more_start);
     } else {
-        console.log('IncompleteLoad', IncompleteLoad);
-        if (IncompleteLoad === false) makeChanges();
+        console.log('IncompleteLoad', IncompleteLoad, 'success', InvJSON.success);
+        if (IncompleteLoad === false && InvJSON.success === true) makeChanges();
     }
 }
 
