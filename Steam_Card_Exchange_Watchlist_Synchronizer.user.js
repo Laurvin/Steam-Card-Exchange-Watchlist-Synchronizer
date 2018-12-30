@@ -3,7 +3,7 @@
 // @namespace Steam Card Exchange Watchlist Synchronizer
 // @author Laurvin
 // @description Synchs with actual Steam Inventory
-// @version 3.0
+// @version 3.2
 // @icon http://i.imgur.com/XYzKXzK.png
 // @downloadURL https://github.com/Laurvin/Steam-Card-Exchange-Watchlist-Synchronizer/raw/master/Steam_Card_Exchange_Watchlist_Synchronizer.user.js
 // @include http://www.steamcardexchange.net/index.php?userlist
@@ -43,7 +43,7 @@ function monkeyRequest(url) {
         GM_xmlhttpRequest({
             method: 'GET',
             url: url,
-            timeout: 9000,
+            timeout: 25000,
             onload: function(response) {
                 var InvJSON = JSON.parse(response.responseText);
                 resolve(InvJSON);
@@ -79,7 +79,7 @@ function parseInvJSON(InvJSON) {
     });
 
     $.each(InvJSON.rgDescriptions, function(index, item) {
-        if (item.type.includes("Trading Card")) {
+        if (!item.type.includes("Foil Trading Card") && item.type.includes("Trading Card")) {
             if (Steamids.includes(item.market_fee_app)) {
                 CardAmounts[item.market_fee_app] += InventoryAmounts[item.classid + "_" + item.instanceid];
             } else {
@@ -96,7 +96,14 @@ function parseInvJSON(InvJSON) {
         loadInventory('http://steamcommunity.com/my/inventory/json/753/6?start=' + InvJSON.more_start);
     } else {
         console.log('IncompleteLoad', IncompleteLoad, 'success', InvJSON.success);
-        if (IncompleteLoad === false && InvJSON.success === true) makeChanges();
+        if (IncompleteLoad === false && InvJSON.success === true)
+		{
+			makeChanges();
+		}
+		else
+		{
+			$('#SynchDiv').append('<p>FAILURE loading (part of) Steam Inventory! See if this link works: <a href="http://steamcommunity.com/my/inventory/json/753/6">http://steamcommunity.com/my/inventory/json/753/6</a>, if not then Steam is down or things have changed. Reload this page to try again.</p>');
+		}
     }
 }
 
