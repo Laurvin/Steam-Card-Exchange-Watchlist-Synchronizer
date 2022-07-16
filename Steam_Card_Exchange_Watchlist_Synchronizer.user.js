@@ -3,11 +3,11 @@
 // @namespace Steam Card Exchange Watchlist Synchronizer
 // @author Laurvin
 // @description Synchs with actual Steam Inventory
-// @version 3.3
+// @version 3.4
 // @icon http://i.imgur.com/XYzKXzK.png
-// @downloadURL https://github.com/Laurvin/Steam-Card-Exchange-Watchlist-Synchronizer/raw/master/Steam_Card_Exchange_Watchlist_Synchronizer.user.js
-// @include http://www.steamcardexchange.net/index.php?userlist
-// @include https://www.steamcardexchange.net/index.php?userlist
+// @updateURL https://github.com/Laurvin/Steam-Card-Exchange-Watchlist-Synchronizer/raw/master/Steam_Card_Exchange_Watchlist_Synchronizer.user.js
+// @match http://www.steamcardexchange.net/index.php?userlist
+// @match https://www.steamcardexchange.net/index.php?userlist
 // @grant GM_xmlhttpRequest
 // @run-at document-idle
 // ==/UserScript==
@@ -29,6 +29,7 @@ function init() {
 }
 
 function addHTMLElements() {
+    $("<style type='text/css'> .needed1 {color: #d30000;} .needed2 {color: #f56600;} .needed3 {color: #f59e00;} </style>").appendTo("head");
     $('h1.empty').append('<button class="button-blue" id="SynchIt" style="margin-top: 25px;">SYNCH</button>');
     $('#SynchIt').click(SynchLists);
 }
@@ -170,7 +171,7 @@ function makeChanges() {
         var CardsNeeded = SetSize - RemainingCards;
         $(MyRows[i]).append('<td>' + CardAmounts[appID] + '</td>');
         $(MyRows[i]).append('<td>' + BadgesAbleToCreate + '</td>');
-        $(MyRows[i]).append('<td>' + CardsNeeded + '</td>');
+        $(MyRows[i]).append('<td class="needed' + CardsNeeded + '">' + CardsNeeded + '</td>');
         $(MyRows[i]).append('<td>' + RemainingCards + '</td>');
     }
 
