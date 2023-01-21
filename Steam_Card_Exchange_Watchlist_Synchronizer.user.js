@@ -3,8 +3,9 @@
 // @namespace Steam Card Exchange Watchlist Synchronizer
 // @author Laurvin
 // @description Synchs with actual Steam Inventory
-// @version 3.4
+// @version 3.5
 // @icon http://i.imgur.com/XYzKXzK.png
+// @downloadURL https://github.com/Laurvin/Steam-Card-Exchange-Watchlist-Synchronizer/raw/master/Steam_Card_Exchange_Watchlist_Synchronizer.user.js
 // @updateURL https://github.com/Laurvin/Steam-Card-Exchange-Watchlist-Synchronizer/raw/master/Steam_Card_Exchange_Watchlist_Synchronizer.user.js
 // @match http://www.steamcardexchange.net/index.php?userlist
 // @match https://www.steamcardexchange.net/index.php?userlist
