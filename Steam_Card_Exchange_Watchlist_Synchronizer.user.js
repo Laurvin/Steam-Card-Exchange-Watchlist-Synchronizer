@@ -3,7 +3,7 @@
 // @namespace Steam Card Exchange Watchlist Synchronizer
 // @author Laurvin
 // @description Synchs with actual Steam Inventory
-// @version 3.5
+// @version 4.0
 // @icon http://i.imgur.com/XYzKXzK.png
 // @downloadURL https://github.com/Laurvin/Steam-Card-Exchange-Watchlist-Synchronizer/raw/master/Steam_Card_Exchange_Watchlist_Synchronizer.user.js
 // @updateURL https://github.com/Laurvin/Steam-Card-Exchange-Watchlist-Synchronizer/raw/master/Steam_Card_Exchange_Watchlist_Synchronizer.user.js
@@ -31,12 +31,12 @@ function init() {
 
 function addHTMLElements() {
     $("<style type='text/css'> .needed1 {color: #d30000;} .needed2 {color: #f56600;} .needed3 {color: #f59e00;} </style>").appendTo("head");
-    $('h1.empty').append('<button class="button-blue" id="SynchIt" style="margin-top: 25px;">SYNCH</button>');
-    $('#SynchIt').click(SynchLists);
+    $('span[class="tracking-wider font-league-gothic"]').eq(1).after('&nbsp;<a class="btn-primary lg:w-min" id="SynchIt">SYNCH</a>');
+    $('#SynchIt').on("click", SynchLists);
 }
 
 function SynchLists() {
-    $('#inventory-content').prepend('<div class="content-box-normal" style="line-height: 20px;" id="SynchDiv"><p>Synching, please be patient and keep in mind you need to be logged into Steam on this browser for this to work.</p></div>');
+    $('div[class="flex items-center p-2 mx-auto mt-0.5 leading-none bg-black"]').after('<div class="content-box-normal" style="line-height: 20px;" id="SynchDiv"><p>Synching, please be patient and keep in mind you need to be logged into Steam on this browser for this to work.</p></div>');
     $('#SynchDiv').append('<p>Loading Steam Inventory in 2,000 item chunks. <span id="SteamInvLoading">Loading from 0 onwards.</span>');
     $('#SynchDiv').append('<p>Number of games with cards in Steam Inventory: <strong><span id="SteamInvTotals">0</span></strong></p>');
     loadInventory('https://steamcommunity.com/my/inventory/json/753/6');
@@ -151,21 +151,13 @@ function makeChanges() {
     $('#SynchIt').remove();
 
     console.log("Starting Table Additions!");
-    $("#private_watchlist tr:first").append('<th title="Cards Owned">C O</th>');
-    $("#private_watchlist tr:first").append('<th title="Possible Badges to be created">P B</th>');
-    $("#private_watchlist tr:first").append('<th title="Cards needed for another badge">C N</th>');
-    $("#private_watchlist tr:first").append('<th title="Cards remaining after crafting badges">C R</th>');
 
     var MyRows = $('#private_watchlist').find('tbody').find('tr');
 
     for (var i = 0; i < MyRows.length; i++) {
         var appID = $(MyRows[i]).find('a').attr('href');
         appID = appID.substring(appID.lastIndexOf('-') + 1);
-        var SetSize = $(MyRows[i]).find('td:eq(3)').text();
-        var SetSizeStart = SetSize.indexOf('of');
-        var SetSizeEnd = SetSize.indexOf(')');
-        var CardsIncluded = (SetSize.indexOf('Cards') == -1) ? 0 : -5; // Need to subtract more if the word Cards is still there.
-        SetSize = SetSize.substring(SetSizeStart + 3, SetSizeEnd + CardsIncluded);
+        var SetSize = $(MyRows[i]).find('td').eq(3).text();
         if (CardAmounts[appID] === undefined) CardAmounts[appID] = 0; // If no cards in Inventory this throws up a problem.
         var BadgesAbleToCreate = Math.floor(CardAmounts[appID] / SetSize);
         var RemainingCards = CardAmounts[appID] - (BadgesAbleToCreate * SetSize);
@@ -176,18 +168,24 @@ function makeChanges() {
         $(MyRows[i]).append('<td>' + RemainingCards + '</td>');
     }
 
+    var table = $('#private_watchlist').DataTable();
+    table.destroy(); // Need to destroy the table and then add headers before initiating new table.
+
+    $("#private_watchlist thead tr").append('<th title="Cards Owned" class="w-14">C O</th>');
+    $("#private_watchlist thead tr").append('<th title="Possible Badges to be created" class="w-14">P B</th>');
+    $("#private_watchlist thead tr").append('<th title="Cards needed for another badge" class="w-14">C N</th>');
+    $("#private_watchlist thead tr").append('<th title="Cards remaining after crafting badges" class="w-14">C R</th>');
+
     $('#private_watchlist').dataTable({
         dom: 'rt<"dataTables_footer"ip>',
         "searching": false,
-        "destroy": true,
         pageLength: -1,
         autoWidth: false,
         stateSave: true,
-        "order": [
-            [4, 'desc'],
-            [0, 'asc']
-        ]
+        "order": [[4, 'asc'],[7, 'asc']]
     });
+
+    $('#SCEFilter').trigger('click'); // After synch we sort on worth and cards needed and show only green.
 
     console.log("Finished Table Additions!");
     CardAmounts = null;
