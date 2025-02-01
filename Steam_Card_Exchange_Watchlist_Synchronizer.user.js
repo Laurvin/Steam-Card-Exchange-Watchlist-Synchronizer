@@ -3,7 +3,7 @@
 // @namespace Steam Card Exchange Watchlist Synchronizer
 // @author Laurvin
 // @description Synchs with actual Steam Inventory
-// @version 4.0
+// @version 4.1
 // @icon http://i.imgur.com/XYzKXzK.png
 // @downloadURL https://github.com/Laurvin/Steam-Card-Exchange-Watchlist-Synchronizer/raw/master/Steam_Card_Exchange_Watchlist_Synchronizer.user.js
 // @updateURL https://github.com/Laurvin/Steam-Card-Exchange-Watchlist-Synchronizer/raw/master/Steam_Card_Exchange_Watchlist_Synchronizer.user.js
@@ -31,7 +31,7 @@ function init() {
 
 function addHTMLElements() {
     $("<style type='text/css'> .needed1 {color: #d30000;} .needed2 {color: #f56600;} .needed3 {color: #f59e00;} </style>").appendTo("head");
-    $('span[class="tracking-wider font-league-gothic"]').eq(1).after('&nbsp;<a class="btn-primary lg:w-min" id="SynchIt">SYNCH</a>');
+    $('span[class="tracking-wider font-league-gothic"]').eq(0).after('&nbsp;<a class="btn-primary lg:w-min" id="SynchIt">SYNCH</a>');
     $('#SynchIt').on("click", SynchLists);
 }
 
