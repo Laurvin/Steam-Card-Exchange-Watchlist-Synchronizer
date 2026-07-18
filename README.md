@@ -1,4 +1,7 @@
 # Steam-Card-Exchange-Watchlist-Synchronizer
+This script has been superceded by the [Steam Card Exchange Tools](https://github.com/Laurvin/Steam-Card-Exchange-Tools) userscript.
+
+
 Synchs with actual Steam Inventory
 
 This reads in your Steam Inventory and then adds all games you have cards for to the Steam Card Exchange Watchlist and removes all games you do not have cards for.
